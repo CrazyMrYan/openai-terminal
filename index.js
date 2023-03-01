@@ -6,30 +6,37 @@ const Spinner = require('cli-spinner').Spinner;
 const spinner = new Spinner('Loading.. %s');
 spinner.setSpinnerString('▂ ▃ ▄ ▅ ▆ ▇ █');
 
-async function main() {
-  // 判断文件是否存在
-  const keysIsExist = fs.existsSync('openai_keys');
-  if(!keysIsExist) {
-    const { apiKey } = await inquirer.prompt({
-      type: 'password',
-      name: 'apiKey',
-      message: '请输入 Open AI 的 Key',
-    })
+function writeOpenaiKeysFile () {
+  return new Promise(async (resolve) => {
+    // 判断文件是否存在
+    const keysIsExist = fs.existsSync('openai_keys');
+    if(!keysIsExist) {
+      const { apiKey } = await inquirer.prompt({
+        type: 'password',
+        name: 'apiKey',
+        message: '请输入 Open AI 的 Key',
+      })
+  
+      // 覆盖写入
+      fs.writeFile('openai_keys', apiKey.trim(), { flag: 'w' }, (err) => {
+        if (err) console.error(err)
+        else resolve(apiKey.trim())
+      })
+    } else {
+      // 读取
+      fs.readFile('openai_keys', (err, data) => {
+        if (err) {
+          console.error(err)
+          return
+        }
+        resolve(data.toString())
+      })
+    }
+  })
+}
 
-    // 覆盖写入
-    fs.writeFile('openai_keys', apiKey.trim(), { flag: 'w' }, (err) => {
-      if (err) console.error(err)
-      else main()
-    })
-  } else {
-    fs.readFile('openai_keys', (err, data) => {
-      if (err) {
-        console.error(err)
-        return
-      }
-      config.apiKey = data.toString();
-    })
-  }
+async function main() {
+  const apiKey = await writeOpenaiKeysFile();
 
 	const { model } = await inquirer.prompt({
 		type: 'list',
@@ -45,12 +52,12 @@ async function main() {
 	})
 	config.model = model;
 
-  const { apiKey } = config;
-	console.log('\033[42;30m LGOIN \033[40;32m 登录成功\033[0m');
 	const configuration = new Configuration({
 		apiKey
 	});
 	config.openai = new OpenAIApi(configuration);
+	console.log('\033[42;30m LGOIN \033[40;32m 登录成功\033[0m');
+
 	start()
 }
 
