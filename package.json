@@ -1,0 +1,17 @@
+{
+  "name": "openai-terminal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cli-spinner": "^0.2.10",
+    "inquirer": "^8.2.5",
+    "openai": "^3.1.0"
+  }
+}
